@@ -1,0 +1,214 @@
+{
+  "id": "vpwf000000000000",
+  "name": "VP-00 Setup (creates the job table)",
+  "nodes": [
+    {
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "parameters": {},
+      "id": "8c4d60e3-23b6-4d2f-a440-194b18afdf2b",
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Setup: Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video-setup",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "3b3dc1ae-b854-470d-ac56-04009416b27e",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "vpcred00000000001",
+          "name": "Video Client Key"
+        }
+      },
+      "id": "a7851801-0504-4ac0-a736-e6fbe3fc0bf5",
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "name": "Create video_jobs table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "video_jobs",
+        "columns": {
+          "column": [
+            {
+              "name": "job_id",
+              "type": "string"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "priority",
+              "type": "number"
+            },
+            {
+              "name": "created_ms",
+              "type": "number"
+            },
+            {
+              "name": "updated_ms",
+              "type": "number"
+            },
+            {
+              "name": "lease_ms",
+              "type": "number"
+            },
+            {
+              "name": "not_before_ms",
+              "type": "number"
+            },
+            {
+              "name": "worker_id",
+              "type": "string"
+            },
+            {
+              "name": "attempts",
+              "type": "number"
+            },
+            {
+              "name": "max_attempts",
+              "type": "number"
+            },
+            {
+              "name": "cancel_requested",
+              "type": "boolean"
+            },
+            {
+              "name": "progress",
+              "type": "number"
+            },
+            {
+              "name": "stage",
+              "type": "string"
+            },
+            {
+              "name": "message",
+              "type": "string"
+            },
+            {
+              "name": "idem_key",
+              "type": "string"
+            },
+            {
+              "name": "data",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "id": "2d3b9d6e-967b-4540-ac0a-a31e5c323262",
+      "position": [
+        240,
+        100
+      ]
+    },
+    {
+      "name": "Setup: Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{json:{status:200,body:{ok:true,table:'video_jobs',note:'job table is ready'}}}];"
+      },
+      "id": "1a5477b2-0d95-4177-a3fd-0a21a1e02aa4",
+      "position": [
+        480,
+        100
+      ]
+    },
+    {
+      "name": "Setup: Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.body }}",
+        "options": {
+          "responseCode": "={{ $json.status }}"
+        }
+      },
+      "id": "bfb9d381-b257-4bf4-a67a-32fb1e07a8a0",
+      "position": [
+        720,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create video_jobs table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup: Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create video_jobs table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create video_jobs table": {
+      "main": [
+        [
+          {
+            "node": "Setup: Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup: Reply": {
+      "main": [
+        [
+          {
+            "node": "Setup: Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
